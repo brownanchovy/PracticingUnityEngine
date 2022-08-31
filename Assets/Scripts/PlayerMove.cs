@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class PlayerMove : MonoBehaviour
 {
+    public GameManager gameManager;
     public float maxSpeed;
     public float jumpPower;
     Rigidbody2D rigid;
@@ -79,17 +80,45 @@ public class PlayerMove : MonoBehaviour
         {
             //Attack
             if(rigid.velocity.y < 0 && transform.position.y > collision.transform.position.y){
-                
+                OnAttack(collision.transform);
             }
-            else //Damaged
+            else{//Damaged
                 Debug.Log("Player has been hit");
                 OnDamage(collision.transform.position);
-            
+            } //괄호 범위 신경쓰기 괄호 없으면 디버그만 실행됨 ondamage는 예외처리가 안된단 말씀
+        }
+    }
+
+    void OnTriggerEnter2D(Collider2D collision){
+        if (collision.gameObject.tag == "Item"){
+            //Point
+            bool isBronze = collision.gameObject.name.Contains("bron");
+            bool isSilver = collision.gameObject.name.Contains("sli");
+            bool isGold = collision.gameObject.name.Contains("glo");
+
+            if (isBronze){
+                gameManager.stagePoint += 50;
+            }
+            else if (isSilver){
+                gameManager.stagePoint += 100;
+            }
+            else if(isGold){
+                gameManager.stagePoint += 200;
+            }
+            //Deactivate Item
+            collision.gameObject.SetActive(false);
+        }
+        else if (collision.gameObject.tag == "Finish"){
+            //Next Stage
+            gameManager.NextStage();
         }
     }
 
     void OnAttack(Transform enemy){
         //Point
+        gameManager.stagePoint += 100;
+        //Reaction Force
+        rigid.AddForce(Vector2.up * 5,ForceMode2D.Impulse);
 
         //Enemy Die
         enemy enemyMove = enemy.GetComponent<enemy>(); //enemy.cs 파일에서 변수에 대한 정보를 가져옴
@@ -100,6 +129,9 @@ public class PlayerMove : MonoBehaviour
     {
         //Change Layer
         gameObject.layer = 9;
+
+        //Minus Health
+        gameManager.health -= 1;
 
         //View Alpha
         spriteRenderer.color = new Color(1,1,1,0.4f);
