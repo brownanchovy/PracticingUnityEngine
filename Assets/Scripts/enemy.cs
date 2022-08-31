@@ -7,6 +7,7 @@ public class enemy : MonoBehaviour
     Animator anim;
     Rigidbody2D rigid;
     public int nextMove;
+    CircleCollider2D collide;
 
     public float TimetoThink;
     SpriteRenderer spriteRenderer;
@@ -16,6 +17,9 @@ public class enemy : MonoBehaviour
         anim = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         rigid = GetComponent<Rigidbody2D>();
+        collide = GetComponent<CircleCollider2D>();
+
+
         Think();
         
         Invoke("Think",5);
@@ -66,5 +70,29 @@ public class enemy : MonoBehaviour
         spriteRenderer.flipX = nextMove == 1;
         CancelInvoke();
         Invoke("Think",5);
+    }
+
+
+    //몬스터 죽었을때 취해야하는 액션을 구현한다.
+    public void OnDamaged(){ //PlayerMoves.cs에서 OnDamaged 함수를 호출하였기 때문에 public으로 설정한다.
+        
+        //Sprite Alpha
+        spriteRenderer.color = new Color(1,1,1,0.4f);
+
+        //Sprite Flip Y 아래로 깨꼬닥
+        spriteRenderer.flipY = true;
+
+        //Collider Disabled 몬스터 충돌효과 무시
+        collide.enabled = false;
+
+        //Die Effect Jump
+        rigid.AddForce(Vector2.up * 5, ForceMode2D.Impulse);
+
+        //Destroy
+        Invoke("Deactive", 5);
+    }
+
+    void Deactive(){
+        gameObject.SetActive(false);
     }
 }

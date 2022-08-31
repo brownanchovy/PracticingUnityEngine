@@ -77,10 +77,23 @@ public class PlayerMove : MonoBehaviour
     {
         if(collision.gameObject.tag == "enemy")
         {
-            Debug.Log("Player has been hit");
-            OnDamage(collision.transform.position);
+            //Attack
+            if(rigid.velocity.y < 0 && transform.position.y > collision.transform.position.y){
+                
+            }
+            else //Damaged
+                Debug.Log("Player has been hit");
+                OnDamage(collision.transform.position);
             
         }
+    }
+
+    void OnAttack(Transform enemy){
+        //Point
+
+        //Enemy Die
+        enemy enemyMove = enemy.GetComponent<enemy>(); //enemy.cs 파일에서 변수에 대한 정보를 가져옴
+        enemyMove.OnDamaged(); //따라서 enemy.cs에 OnDamage() 함수에 대한 정보가 있어야함.
     }
 
     void OnDamage(Vector2 targetPos)
