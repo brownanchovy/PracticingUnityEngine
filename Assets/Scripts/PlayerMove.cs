@@ -4,6 +4,12 @@ using UnityEngine;
 
 public class PlayerMove : MonoBehaviour
 {
+    public AudioClip audioJump;
+    public AudioClip audioAttack;
+    public AudioClip audioDamaged;
+    public AudioClip audioItem;
+    public AudioClip audioDie;
+    public AudioClip audioFinish;
     public GameManager gameManager;
     public float maxSpeed;
     public float jumpPower;
@@ -13,6 +19,8 @@ public class PlayerMove : MonoBehaviour
 
     CapsuleCollider2D collide_pl;
 
+    AudioSource audioSource;
+
     // Start is called before the first frame update
     void Awake() 
     {
@@ -21,6 +29,31 @@ public class PlayerMove : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
         collide_pl = GetComponent<CapsuleCollider2D>();
+        audioSource = GetComponent<AudioSource>();
+    }
+
+    void SoundTrack(string action){
+            switch (action) {
+                case "JUMP":
+                    audioSource.clip = audioJump;
+                    break;
+                case "ATTACK":
+                    audioSource.clip = audioAttack;
+                    break;
+                case "DAMAGED":
+                    audioSource.clip = audioDamaged;
+                    break;
+                case "ITEM":
+                    audioSource.clip = audioItem;
+                    break;
+                case "DIE":
+                    audioSource.clip = audioDie;
+                    break;
+                case "FINISH":
+                    audioSource.clip = audioFinish;
+                    break;
+            }
+            audioSource.Play();
     }
     
     void Update() 
@@ -29,6 +62,7 @@ public class PlayerMove : MonoBehaviour
         if(Input.GetButtonDown("Jump") && !animator.GetBool("IsJumping")){
             rigid.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
             animator.SetBool("IsJumping", true);
+            SoundTrack("JUMP");
             }
 
         
@@ -88,6 +122,7 @@ public class PlayerMove : MonoBehaviour
             else{//Damaged
                 Debug.Log("Player has been hit");
                 OnDamage(collision.transform.position);
+                
             } //괄호 범위 신경쓰기 괄호 없으면 디버그만 실행됨 ondamage는 예외처리가 안된단 말씀
         }
     }
@@ -110,10 +145,12 @@ public class PlayerMove : MonoBehaviour
             }
             //Deactivate Item
             collision.gameObject.SetActive(false);
+            SoundTrack("ITEM");
         }
         else if (collision.gameObject.tag == "Finish"){
             //Next Stage
             gameManager.NextStage();
+            SoundTrack("FINISH");
         }
     }
 
@@ -126,6 +163,7 @@ public class PlayerMove : MonoBehaviour
         //Enemy Die
         enemy enemyMove = enemy.GetComponent<enemy>(); //enemy.cs 파일에서 변수에 대한 정보를 가져옴
         enemyMove.OnDamaged(); //따라서 enemy.cs에 OnDamage() 함수에 대한 정보가 있어야함.
+        SoundTrack("ATTACK");
     }
 
     void OnDamage(Vector2 targetPos)
@@ -145,6 +183,8 @@ public class PlayerMove : MonoBehaviour
 
         //Animation
         animator.SetTrigger("BeDamaged");
+        SoundTrack("DAMAGED");
+
 
         //recursive function
         Invoke("OffDamaged",2);
@@ -168,6 +208,8 @@ public class PlayerMove : MonoBehaviour
 
         //Die Effect Jump
         rigid.AddForce(Vector2.up * 5, ForceMode2D.Impulse);
+
+        SoundTrack("DIE");
     }
 
     public void VelocityZero(){
