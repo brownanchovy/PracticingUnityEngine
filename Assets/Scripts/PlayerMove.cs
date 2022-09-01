@@ -11,6 +11,8 @@ public class PlayerMove : MonoBehaviour
     SpriteRenderer spriteRenderer;
     Animator animator;
 
+    CapsuleCollider2D collide_pl;
+
     // Start is called before the first frame update
     void Awake() 
     {
@@ -18,6 +20,7 @@ public class PlayerMove : MonoBehaviour
         rigid = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
+        collide_pl = GetComponent<CapsuleCollider2D>();
     }
     
     void Update() 
@@ -131,7 +134,7 @@ public class PlayerMove : MonoBehaviour
         gameObject.layer = 9;
 
         //Minus Health
-        gameManager.health -= 1;
+        gameManager.HealthDown();
 
         //View Alpha
         spriteRenderer.color = new Color(1,1,1,0.4f);
@@ -151,5 +154,23 @@ public class PlayerMove : MonoBehaviour
     {
         gameObject.layer = 6;
         spriteRenderer.color = new Color(1,1,1,1);
+    }
+
+    public void OnDie(){
+        //Sprite Alpha
+        spriteRenderer.color = new Color(1,1,1,0.4f);
+
+        //Sprite Flip Y 아래로 깨꼬닥
+        spriteRenderer.flipY = true;
+
+        //Collider Disabled 몬스터 충돌효과 무시
+        collide_pl.enabled = false;
+
+        //Die Effect Jump
+        rigid.AddForce(Vector2.up * 5, ForceMode2D.Impulse);
+    }
+
+    public void VelocityZero(){
+        rigid.velocity= Vector2.zero;
     }
 }

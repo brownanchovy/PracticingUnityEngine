@@ -7,7 +7,7 @@ public class enemy : MonoBehaviour
     Animator anim;
     Rigidbody2D rigid;
     public int nextMove;
-    CircleCollider2D collide;
+    public CircleCollider2D collide;
 
     public float TimetoThink;
     SpriteRenderer spriteRenderer;
