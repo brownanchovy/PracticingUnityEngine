@@ -13,6 +13,8 @@ public class PlayerMove : MonoBehaviour
     public GameManager gameManager;
     public float maxSpeed;
     public float jumpPower;
+    public int maxJump =2;
+    public bool isGrounded = false;
     Rigidbody2D rigid;
     SpriteRenderer spriteRenderer;
     Animator animator;
@@ -22,8 +24,7 @@ public class PlayerMove : MonoBehaviour
     AudioSource audioSource;
     RaycastHit2D rayHit;
     private bool doubleJump;
-    [SerializeField] private Transform groundCheck;
-    [SerializeField] private LayerMask groundLayer;
+    
 
     // Start is called before the first frame update
     void Awake() 
@@ -34,6 +35,7 @@ public class PlayerMove : MonoBehaviour
         animator = GetComponent<Animator>();
         collide_pl = GetComponent<CapsuleCollider2D>();
         audioSource = GetComponent<AudioSource>();
+        maxJump = 0;
     }
 
     void SoundTrack(string action){
@@ -59,10 +61,7 @@ public class PlayerMove : MonoBehaviour
             }
             audioSource.Play();
     }
-    private bool IsGrounded()
-    {
-        return Physics2D.OverlapCircle(groundCheck.position, 0.2f, groundLayer);
-    }
+    
     
     void Update() 
     {
@@ -88,14 +87,21 @@ public class PlayerMove : MonoBehaviour
         }
         */
         //Jump //doule jump 구상 중
-        if((Input.GetButtonDown("Jump") && !animator.GetBool("IsJumping"))){ //단순점프
-         //While Jumping and the distance between floor and char is above 0.5f
-                rigid.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
-                animator.SetBool("IsJumping", true);
-                SoundTrack("JUMP");
+        if (isGrounded)
+        {
+            if(maxJump>0)
+
+            { 
+                if((Input.GetButtonDown("Jump"))) { //단순점프
+                //While Jumping and the distance between floor and char is above 0.5f
+                        rigid.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
+                        animator.SetBool("IsJumping", true);
+                        SoundTrack("JUMP");
+                        maxJump--;
             
             }
-        
+            }
+        }
 
         
 
@@ -140,7 +146,7 @@ public class PlayerMove : MonoBehaviour
         }
     }
 
-    void OnCollisionEnter2D(Collision2D collision)
+    public void OnCollisionEnter2D(Collision2D collision)
     {
         if(collision.gameObject.tag == "enemy")
         {
@@ -153,6 +159,12 @@ public class PlayerMove : MonoBehaviour
                 OnDamage(collision.transform.position);
                 
             } //괄호 범위 신경쓰기 괄호 없으면 디버그만 실행됨 ondamage는 예외처리가 안된단 말씀
+        if (collision.gameObject.tag == "Ground")
+            { 
+            isGrounded = true;    //Ground에 닿으면 isGround는 true
+
+            maxJump = 2;          //Ground에 닿으면 점프횟수가 2로 초기화됨
+            }
         }
     }
 
