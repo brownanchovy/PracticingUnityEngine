@@ -20,6 +20,10 @@ public class PlayerMove : MonoBehaviour
     CapsuleCollider2D collide_pl;
 
     AudioSource audioSource;
+    RaycastHit2D rayHit;
+    private bool doubleJump;
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private LayerMask groundLayer;
 
     // Start is called before the first frame update
     void Awake() 
@@ -55,15 +59,43 @@ public class PlayerMove : MonoBehaviour
             }
             audioSource.Play();
     }
+    private bool IsGrounded()
+    {
+        return Physics2D.OverlapCircle(groundCheck.position, 0.2f, groundLayer);
+    }
     
     void Update() 
     {
-        //Jump
-        if(Input.GetButtonDown("Jump") && !animator.GetBool("IsJumping")){
-            rigid.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
-            animator.SetBool("IsJumping", true);
-            SoundTrack("JUMP");
+        /*
+        if (IsGrounded() && !Input.GetButton("Jump"))
+        {
+            doubleJump = false;
+        }
+
+        if (Input.GetButtonDown("Jump"))
+        {
+            if (IsGrounded() || doubleJump)
+            {
+                rigid.velocity = new Vector2(rigid.velocity.x, jumpPower);
+
+                doubleJump = !doubleJump;
             }
+        }
+
+        if (Input.GetButtonUp("Jump") && rigid.velocity.y > 0f)
+        {
+            rigid.velocity = new Vector2(rigid.velocity.x, rigid.velocity.y * 0.5f);
+        }
+        */
+        //Jump //doule jump 구상 중
+        if((Input.GetButtonDown("Jump") && !animator.GetBool("IsJumping"))){ //단순점프
+         //While Jumping and the distance between floor and char is above 0.5f
+                rigid.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
+                animator.SetBool("IsJumping", true);
+                SoundTrack("JUMP");
+            
+            }
+        
 
         
 
@@ -99,13 +131,10 @@ public class PlayerMove : MonoBehaviour
 
         //Landing Flatform
         if(rigid.velocity.y < 0){
-            Debug.DrawRay(rigid.position, Vector3.down, new Color(0,1,0));
-
-            RaycastHit2D rayHit = Physics2D.Raycast(rigid.position, Vector3.down, 1, LayerMask.GetMask("Platform"));
+            makeRayHit();
 
             if(rayHit.collider != null) {
-                if(rayHit.distance < 0.5f)
-                    Debug.Log(rayHit.collider.name);
+                if(rayHit.distance < 0.7f)
                     animator.SetBool("IsJumping", false);
             }
         }
@@ -214,5 +243,12 @@ public class PlayerMove : MonoBehaviour
 
     public void VelocityZero(){
         rigid.velocity= Vector2.zero;
+    }
+
+    public void makeRayHit(){
+        Debug.DrawRay(rigid.position, Vector3.down, new Color(0,1,0));
+
+        rayHit = Physics2D.Raycast(rigid.position, Vector3.down, 1, LayerMask.GetMask("Platform"));
+
     }
 }
