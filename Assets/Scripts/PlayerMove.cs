@@ -14,7 +14,7 @@ public class PlayerMove : MonoBehaviour
     public float maxSpeed;
     public float jumpPower;
     public int maxJump =2;
-    public bool isGrounded = false;
+    //public bool isGrounded = false;
     Rigidbody2D rigid;
     SpriteRenderer spriteRenderer;
     Animator animator;
@@ -87,21 +87,22 @@ public class PlayerMove : MonoBehaviour
         }
         */
         //Jump //doule jump 구상 중
-        if (isGrounded)
-        {
+        
+            Debug.Log("test1");
             if(maxJump>0)
 
-            { 
-                if((Input.GetButtonDown("Jump"))) { //단순점프
+            {
+                Debug.Log("test2");
+                if(Input.GetButtonDown("Jump")) { //단순점프
                 //While Jumping and the distance between floor and char is above 0.5f
-                        rigid.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
-                        animator.SetBool("IsJumping", true);
-                        SoundTrack("JUMP");
-                        maxJump--;
+                    rigid.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
+                    animator.SetBool("IsJumping", true);
+                    SoundTrack("JUMP");
+                    maxJump--;
+            
+                }   
             
             }
-            }
-        }
 
         
 
@@ -148,6 +149,7 @@ public class PlayerMove : MonoBehaviour
 
     public void OnCollisionEnter2D(Collision2D collision)
     {
+        Debug.Log("test0");
         if(collision.gameObject.tag == "enemy")
         {
             //Attack
@@ -159,16 +161,21 @@ public class PlayerMove : MonoBehaviour
                 OnDamage(collision.transform.position);
                 
             } //괄호 범위 신경쓰기 괄호 없으면 디버그만 실행됨 ondamage는 예외처리가 안된단 말씀
-        if (collision.gameObject.tag == "Ground")
+        }
+    
+            Debug.Log("test0");
+            if (collision.gameObject.tag == "Ground")
             { 
-            isGrounded = true;    //Ground에 닿으면 isGround는 true
+                //isGrounded = true;
+                Debug.Log("test");  //Ground에 닿으면 isGround는 true
 
-            maxJump = 2;          //Ground에 닿으면 점프횟수가 2로 초기화됨
+                maxJump = 2;          //Ground에 닿으면 점프횟수가 2로 초기화됨
             }
         }
-    }
+    
 
-    void OnTriggerEnter2D(Collider2D collision){
+    void OnTriggerEnter2D(Collider2D collision)
+    {
         if (collision.gameObject.tag == "Item"){
             //Point
             bool isBronze = collision.gameObject.name.Contains("bron");
@@ -195,16 +202,16 @@ public class PlayerMove : MonoBehaviour
         }
     }
 
-    void OnAttack(Transform enemy){
-        //Point
-        gameManager.stagePoint += 100;
-        //Reaction Force
-        rigid.AddForce(Vector2.up * 5,ForceMode2D.Impulse);
+        void OnAttack(Transform enemy){
+            //Point
+            gameManager.stagePoint += 100;
+            //Reaction Force
+            rigid.AddForce(Vector2.up * 5,ForceMode2D.Impulse);
 
-        //Enemy Die
-        enemy enemyMove = enemy.GetComponent<enemy>(); //enemy.cs 파일에서 변수에 대한 정보를 가져옴
-        enemyMove.OnDamaged(); //따라서 enemy.cs에 OnDamage() 함수에 대한 정보가 있어야함.
-        SoundTrack("ATTACK");
+            //Enemy Die
+            enemy enemyMove = enemy.GetComponent<enemy>(); //enemy.cs 파일에서 변수에 대한 정보를 가져옴
+            enemyMove.OnDamaged(); //따라서 enemy.cs에 OnDamage() 함수에 대한 정보가 있어야함.
+            SoundTrack("ATTACK");
     }
 
     void OnDamage(Vector2 targetPos)
